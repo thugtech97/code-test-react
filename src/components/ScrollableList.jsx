@@ -133,7 +133,7 @@ const ScrollableList = ({ items, loading, hasMore, onLoadMore }) => {
       )}
 
       {!hasMore && !loading && (
-        <p className="text-center text-muted">No more launches to display.</p>
+        <p className="text-center text-muted">End of list.</p>
       )}
     </div>
   );
