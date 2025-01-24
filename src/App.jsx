@@ -14,6 +14,7 @@ const App = () => {
   const [totalLaunches, setTotalLaunches] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const LIMIT = 10;
 
@@ -70,19 +71,34 @@ const App = () => {
     window.location.reload();
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setIsSidebarCollapsed(true);
+      } else {
+        setIsSidebarCollapsed(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize(); 
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <Router>
       <div className="d-flex" style={{ height: '100vh', fontFamily: 'Arial, sans-serif' }}>
-        {/* Sidebar */}
         <div
           className="sidebar"
           style={{
-            width: '250px',
+            width: isSidebarCollapsed ? '0' : '250px',
             backgroundColor: '#343a40',
             color: 'white',
-            padding: '20px',
+            padding: isSidebarCollapsed ? '0' : '20px',
             height: '100%',
             boxShadow: '2px 0px 5px rgba(0, 0, 0, 0.1)',
+            transition: 'width 0.3s, padding 0.3s',
+            overflow: 'hidden',
           }}
         >
           <h4 className="text-center text-white">SpaceX Launches</h4>
@@ -116,7 +132,6 @@ const App = () => {
 
         {/* Main Content */}
         <div className="main-content" style={{ flex: 1, padding: '20px', backgroundColor: '#f8f9fa' }}>
-          {/* Header with colored background */}
           <header
             className="mb-4"
             style={{
@@ -136,10 +151,8 @@ const App = () => {
               path="/"
               element={
                 <>
-                  {/* Search Field */}
                   <SearchField value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
 
-                  {/* Total Results and Reset Button */}
                   <div className="mb-4 d-flex justify-content-between align-items-center">
                     <div>
                       <strong>{totalLaunches}</strong> total result(s) available
@@ -151,7 +164,6 @@ const App = () => {
                     </div>
                   </div>
 
-                  {/* Scrollable List */}
                   <ScrollableList
                     items={filteredLaunches}
                     loading={loading}

@@ -4,7 +4,7 @@ export const timeAgo = (date) => {
     const diffInMinutes = diffInSeconds / 60;
     const diffInHours = diffInMinutes / 60;
     const diffInDays = diffInHours / 24;
-    const diffInMonths = diffInDays / 30.4375; // Average number of days in a month
+    const diffInMonths = diffInDays / 30.4375; 
     const diffInYears = diffInMonths / 12;
   
     if (diffInYears >= 1) {

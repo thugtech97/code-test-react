@@ -3,7 +3,7 @@ import { timeAgo } from '../helper';
 
 const ScrollableList = ({ items, loading, hasMore, onLoadMore }) => {
   const [expandedItems, setExpandedItems] = useState([]);
-  const [imgError, setImgError] = useState(false); // State to handle broken image
+  const [imgError, setImgError] = useState(false);
   const listRef = useRef(null);
 
   const handleScroll = () => {
@@ -31,8 +31,8 @@ const ScrollableList = ({ items, loading, hasMore, onLoadMore }) => {
   const handleViewClick = (index) => {
     setExpandedItems((prev) =>
       prev.includes(index)
-        ? prev.filter((item) => item !== index) // Hide details if already visible
-        : [...prev, index] // Show details if not visible
+        ? prev.filter((item) => item !== index)
+        : [...prev, index]
     );
   };
 
@@ -46,7 +46,6 @@ const ScrollableList = ({ items, loading, hasMore, onLoadMore }) => {
     }
   };
 
-  // Fallback image URL
   const fallbackImage = "https://static.vecteezy.com/system/resources/previews/004/639/366/non_2x/error-404-not-found-text-design-vector.jpg";
 
   return (
@@ -58,8 +57,8 @@ const ScrollableList = ({ items, loading, hasMore, onLoadMore }) => {
         overflowY: 'auto',
         padding: '10px',
         borderRadius: '5px',
-        scrollbarWidth: 'thin', // For Firefox
-        WebkitOverflowScrolling: 'touch', // For smooth scrolling on iOS
+        scrollbarWidth: 'thin', 
+        WebkitOverflowScrolling: 'touch', 
       }}
     >
       {items.map((item, index) => (
@@ -73,7 +72,6 @@ const ScrollableList = ({ items, loading, hasMore, onLoadMore }) => {
               className={`mt-3 mb-3 fade ${expandedItems.includes(index) ? 'show' : ''}`}
               style={{ display: expandedItems.includes(index) ? 'block' : 'none' }}
             >
-              {/* Top section with flex layout */}
               <div className="d-flex justify-content-between mb-3">
                 <p className="card-text">
                   {timeAgo(item.launch_date_local)} |&nbsp;
@@ -95,7 +93,6 @@ const ScrollableList = ({ items, loading, hasMore, onLoadMore }) => {
                 </p>
               </div>
 
-              {/* Bottom section with picture and details */}
               <div className="d-flex">
                 <div className="me-3">
                   <img
@@ -103,7 +100,7 @@ const ScrollableList = ({ items, loading, hasMore, onLoadMore }) => {
                     alt="Mission Image"
                     className="img-fluid"
                     style={{ maxHeight: '200px', objectFit: 'cover' }}
-                    onError={() => setImgError(true)} // Set error state if image fails
+                    onError={() => setImgError(true)}
                   />
                 </div>
                 <div>
