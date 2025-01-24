@@ -6,7 +6,7 @@ const SearchField = ({ value, onChange }) => {
     <input
       type="text"
       className="form-control mb-4"
-      placeholder="Search by mission name..."
+      placeholder="Search..."
       value={value}
       onChange={onChange}
     />

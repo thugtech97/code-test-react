@@ -155,7 +155,7 @@ const App = () => {
 
                   <div className="mb-4 d-flex justify-content-between align-items-center">
                     <div>
-                      <strong>{totalLaunches}</strong> total result(s) available
+                      <strong>{totalLaunches}</strong> total record(s) available
                     </div>
                     <div>
                       <button className="btn btn-danger" onClick={handleReset}>
