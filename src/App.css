@@ -42,3 +42,14 @@
   color: #888;
 }
 */
+
+/* For smooth slide-down and slide-up effect */
+.slide-down-up {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-in-out;
+}
+
+.slide-down-up.show {
+  max-height: 1000px; /* Set a high enough value to accommodate the content */
+}

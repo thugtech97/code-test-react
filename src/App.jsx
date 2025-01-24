@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { BrowserRouter as Router, Route, Routes, NavLink } from 'react-router-dom';
 import SearchField from './components/SearchField';
 import ScrollableList from './components/ScrollableList';
+import { fetchTotalLaunches, fetchLaunches } from './api';
 
 const App = () => {
   const [launches, setLaunches] = useState([]);
@@ -9,72 +11,170 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [totalLaunches, setTotalLaunches] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   const LIMIT = 10;
 
-  const fetchLaunches = async () => {
+  const getTotalLaunches = async () => {
+    const total = await fetchTotalLaunches();
+    setTotalLaunches(total);
+  };
+
+  const getLaunches = async () => {
     if (loading || !hasMore) return;
     setLoading(true);
 
-    try {
-      const response = await fetch(
-        `https://api.spacexdata.com/v3/launches?limit=${LIMIT}&offset=${offset}`
-      );
-      const data = await response.json();
+    const data = await fetchLaunches(LIMIT, offset);
 
-      if (data.length === 0) {
-        setHasMore(false);
-      } else {
-        setLaunches((prev) => [...prev, ...data]);
-        setFilteredLaunches((prev) => [...prev, ...data]);
-        setOffset((prevOffset) => prevOffset + LIMIT);
-      }
-    } catch (error) {
-      console.error('Error fetching launches:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearchChange = (e) => {
-    const value = e.target.value.toLowerCase();
-    setSearchTerm(value);
-
-    if (value.trim() === '') {
-      setFilteredLaunches(launches); // Reset to full list if search is empty
+    if (data.length === 0) {
+      setHasMore(false);
     } else {
-      const filtered = launches.filter((launch) =>
-        launch.mission_name.toLowerCase().includes(value)
-      );
-      setFilteredLaunches(filtered);
+      setLaunches((prev) => [...prev, ...data]);
+      setOffset((prevOffset) => prevOffset + LIMIT);
     }
+
+    setLoading(false);
   };
 
   useEffect(() => {
-    fetchLaunches();
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const filterLaunches = (term) => {
+      if (term === '') {
+        setFilteredLaunches(launches);
+      } else {
+        const filtered = launches.filter((launch) =>
+          launch.mission_name.toLowerCase().includes(term.toLowerCase())
+        );
+        setFilteredLaunches(filtered);
+      }
+    };
+
+    filterLaunches(debouncedSearchTerm);
+  }, [debouncedSearchTerm, launches]);
+
+  useEffect(() => {
+    getTotalLaunches();
+    getLaunches();
   }, []);
 
+  const handleReset = () => {
+    window.location.reload();
+  };
+
   return (
-    <div className="container mt-5">
-      <h1 className="text-center mb-4">SpaceX Launches</h1>
-      
-      {/* Search Field */}
-      <SearchField value={searchTerm} onChange={handleSearchChange} />
-      
-      {/* Display Number of Results */}
-      <div className="mb-4">
-        <strong>{filteredLaunches.length}</strong> result(s) found
+    <Router>
+      <div className="d-flex" style={{ height: '100vh', fontFamily: 'Arial, sans-serif' }}>
+        {/* Sidebar */}
+        <div
+          className="sidebar"
+          style={{
+            width: '250px',
+            backgroundColor: '#343a40',
+            color: 'white',
+            padding: '20px',
+            height: '100%',
+            boxShadow: '2px 0px 5px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <h4 className="text-center text-white">SpaceX Launches</h4>
+          <ul className="list-unstyled">
+            <li>
+              <NavLink
+                to="/"
+                className="text-white text-decoration-none d-block py-2 px-3"
+                style={({ isActive }) => ({
+                  backgroundColor: isActive ? '#007bff' : 'transparent',
+                  borderRadius: '5px',
+                })}
+              >
+                Home
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/about"
+                className="text-white text-decoration-none d-block py-2 px-3"
+                style={({ isActive }) => ({
+                  backgroundColor: isActive ? '#007bff' : 'transparent',
+                  borderRadius: '5px',
+                })}
+              >
+                About
+              </NavLink>
+            </li>
+          </ul>
+        </div>
+
+        {/* Main Content */}
+        <div className="main-content" style={{ flex: 1, padding: '20px', backgroundColor: '#f8f9fa' }}>
+          {/* Header with colored background */}
+          <header
+            className="mb-4"
+            style={{
+              backgroundColor: '#007bff',
+              color: '#fff',
+              padding: '15px',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              borderRadius: '5px',
+            }}
+          >
+            <h1 className="text-center">SpaceX Launches</h1>
+          </header>
+
+          {/* Routes */}
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <>
+                  {/* Search Field */}
+                  <SearchField value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+
+                  {/* Total Results and Reset Button */}
+                  <div className="mb-4 d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>{totalLaunches}</strong> total result(s) available
+                    </div>
+                    <div>
+                      <button className="btn btn-danger" onClick={handleReset}>
+                        Reset
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Scrollable List */}
+                  <ScrollableList
+                    items={filteredLaunches}
+                    loading={loading}
+                    hasMore={hasMore}
+                    onLoadMore={getLaunches}
+                  />
+                </>
+              }
+            />
+            <Route
+              path="/about"
+              element={
+                <div className="text-center">
+                  <h2>About SpaceX Launches</h2>
+                  <p>Endpoint used: <a href='#'>https://api.spacexdata.com/v3/launches.</a></p>
+                  <p>Developed by: <a href='https://github.com/thugtech97' target='_blank'>https://github.com/thugtech97.</a></p>
+                </div>
+              }
+            />
+          </Routes>
+        </div>
       </div>
-      
-      {/* Scrollable List */}
-      <ScrollableList
-        items={filteredLaunches}
-        loading={loading}
-        hasMore={hasMore}
-        onLoadMore={fetchLaunches}
-      />
-    </div>
+    </Router>
   );
 };
 
