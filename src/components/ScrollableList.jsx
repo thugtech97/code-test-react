@@ -53,7 +53,7 @@ const ScrollableList = ({ items, loading, hasMore, onLoadMore }) => {
       ref={listRef}
       className="scrollable-list"
       style={{
-        height: '70vh',
+        height: '60vh',
         overflowY: 'auto',
         padding: '10px',
         borderRadius: '5px',
